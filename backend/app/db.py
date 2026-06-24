@@ -1,3 +1,4 @@
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from .config import settings
@@ -19,7 +20,11 @@ class DB:
 
 async def connect():
     global client
-    client = AsyncIOMotorClient(settings.mongo_uri)
+    # Atlas (mongodb+srv / *.mongodb.net) needs an explicit CA bundle for TLS.
+    kwargs = {"serverSelectionTimeoutMS": 30000}
+    if "mongodb.net" in settings.mongo_uri or settings.mongo_uri.startswith("mongodb+srv"):
+        kwargs["tlsCAFile"] = certifi.where()
+    client = AsyncIOMotorClient(settings.mongo_uri, **kwargs)
     db = client[settings.db_name]
     DB.doctors = db["doctors"]
     DB.appointments = db["appointments"]
