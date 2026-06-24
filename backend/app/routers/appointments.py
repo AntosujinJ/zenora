@@ -24,7 +24,13 @@ async def book(data: AppointmentCreate):
         raise HTTPException(status_code=409, detail=str(e))
 
     # Fire the confirmation in the background so booking stays instant.
-    asyncio.create_task(notifications.notify_appointment(appt, kind="confirmation"))
+    async def _notify():
+        try:
+            await notifications.notify_appointment(appt, kind="confirmation")
+        except Exception as e:
+            print(f"[NOTIFY · ERROR] {type(e).__name__}: {e}", flush=True)
+
+    asyncio.create_task(_notify())
     return appt
 
 

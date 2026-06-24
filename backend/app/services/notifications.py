@@ -66,14 +66,14 @@ async def send_email(to: str, subject: str, html: str, text: str) -> bool:
     if not to:
         return False
     if not _email_configured():
-        print(f"\n[EMAIL · console] → {_mask(to)}\nSubject: {subject}\n{text}\n")
+        print(f"\n[EMAIL · console] → {_mask(to)}\nSubject: {subject}\n{text}\n", flush=True)
         return True
     try:
         await asyncio.to_thread(_send_email_sync, to, subject, html, text)
-        print(f"[EMAIL · sent] → {_mask(to)} | {subject}")
+        print(f"[EMAIL · sent] → {_mask(to)} | {subject}", flush=True)
         return True
     except Exception as e:
-        print(f"[EMAIL · ERROR] → {_mask(to)}: {e}")
+        print(f"[EMAIL · ERROR] → {_mask(to)}: {type(e).__name__}: {e}", flush=True)
         return False
 
 
@@ -82,7 +82,7 @@ async def send_whatsapp(to: str, text: str) -> bool:
         return False
     phone = _normalize_phone(to)
     if not _whatsapp_configured():
-        print(f"\n[WHATSAPP · console] → {_mask(phone)}\n{text}\n")
+        print(f"\n[WHATSAPP · console] → {_mask(phone)}\n{text}\n", flush=True)
         return True
     url = f"https://graph.facebook.com/v21.0/{settings.whatsapp_phone_id}/messages"
     headers = {"Authorization": f"Bearer {settings.whatsapp_token}"}
@@ -96,10 +96,10 @@ async def send_whatsapp(to: str, text: str) -> bool:
         async with httpx.AsyncClient(timeout=20) as client:
             r = await client.post(url, headers=headers, json=payload)
             r.raise_for_status()
-        print(f"[WHATSAPP · sent] → {phone}")
+        print(f"[WHATSAPP · sent] → {phone}", flush=True)
         return True
     except Exception as e:
-        print(f"[WHATSAPP · ERROR] → {phone}: {e}")
+        print(f"[WHATSAPP · ERROR] → {phone}: {e}", flush=True)
         return False
 
 
