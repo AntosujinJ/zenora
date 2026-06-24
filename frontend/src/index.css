@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-white text-slate-700 antialiased;
+  font-feature-settings: "ss01";
+}
+
+@layer components {
+  .container-x {
+    @apply max-w-[1400px] mx-auto px-6 lg:px-12;
+  }
+
+  /* Gradient text — subtly animated */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(120deg, #0d9488, #14b8a6 35%, #0ea5e9 70%, #0d9488);
+    background-size: 220% auto;
+    animation: gradient-shift 6s ease infinite;
+  }
+
+  /* Glassy card */
+  .glass {
+    @apply bg-white/70 backdrop-blur-xl border border-white/60;
+  }
+
+  /* Soft section eyebrow label */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-3 py-1 rounded-full;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-6 py-3 rounded-xl shadow-[0_10px_40px_-12px_rgba(13,148,136,0.45)] transition active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 font-semibold px-6 py-3 rounded-xl border border-slate-200 hover:border-brand-300 hover:bg-brand-50 transition;
+  }
+}
+
+/* Decorative mesh / blobs */
+.mesh-bg {
+  background:
+    radial-gradient(60rem 30rem at 75% -10%, #ccfbf1 0%, transparent 55%),
+    radial-gradient(50rem 25rem at 0% 5%, #e0f2fe 0%, transparent 55%);
+}
+
+/* Shimmer on hover for cards */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+}
+.shine:hover::after {
+  animation: shimmer 0.9s forwards;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+::selection {
+  background: #99f6e4;
+}

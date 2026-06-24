@@ -1,0 +1,37 @@
+# Render Blueprint for the Zenora backend (FastAPI).
+# In Render: New + → "Blueprint" → connect this repo. Set the `sync: false`
+# values (MONGO_URI, GEMINI_API_KEY, CORS_ORIGINS, optional SMTP) in the dashboard.
+services:
+  - type: web
+    name: zenora-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DB_NAME
+        value: medmvp
+      - key: AI_PROVIDER
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: CLINIC_NAME
+        value: Zenora Clinic
+      - key: JWT_SECRET
+        generateValue: true        # Render generates a strong secret
+      - key: MONGO_URI
+        sync: false                # paste your Atlas connection string
+      - key: GEMINI_API_KEY
+        sync: false                # your Google AI Studio key
+      - key: CORS_ORIGINS
+        sync: false                # your Vercel URL, e.g. https://zenora.vercel.app
+      # Optional — email reminders (Gmail). Leave blank to keep console mode.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false

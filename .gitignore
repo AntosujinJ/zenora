@@ -1,0 +1,29 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Secrets / local env
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Generated deck & assets (may contain screenshots) + helper scripts
+ppt_assets/
+*.pptx
+*.pdf
+frontend/screenshot.mjs
+frontend/booking_shot.mjs
+frontend/redact_shot.mjs
+frontend/build_ppt.mjs
+
+# Uploaded patient files (don't commit)
+backend/uploads/
+
+# Misc
+.DS_Store
