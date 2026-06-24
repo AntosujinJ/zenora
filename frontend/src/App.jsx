@@ -26,8 +26,8 @@ export default function App() {
   const [bookingPackage, setBookingPackage] = useState(null);
 
   useEffect(() => {
-    getClinic().then(setClinic).catch(() => {});
-    getDoctors().then(setDoctors).catch(() => {});
+    getClinic().then((c) => setClinic(c && typeof c === "object" ? c : null)).catch(() => {});
+    getDoctors().then((d) => setDoctors(Array.isArray(d) ? d : [])).catch(() => setDoctors([]));
   }, []);
 
   const openBooking = (doctorId = null) => {
