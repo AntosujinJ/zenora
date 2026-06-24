@@ -11,6 +11,18 @@ from ..services import ai, ratelimit
 router = APIRouter(prefix="/api", tags=["chat"])
 
 
+def _log_ai_error(e: Exception):
+    """Surface the real AI failure in the server logs (status + body if any)."""
+    detail = ""
+    resp = getattr(e, "response", None)
+    if resp is not None:
+        try:
+            detail = f" status={resp.status_code} body={resp.text[:500]}"
+        except Exception:
+            detail = f" status={getattr(resp, 'status_code', '?')}"
+    print(f"[AI ERROR] {type(e).__name__}: {e}{detail}", flush=True)
+
+
 def _check_rate(request: Request):
     ip = request.client.host if request.client else "unknown"
     if not ratelimit.allow(f"chat:{ip}", limit=20, window=60):
@@ -28,7 +40,8 @@ async def chat_stream(req: ChatRequest, request: Request):
             async for token in ai.chat_stream(messages):
                 collected.append(token)
                 yield token
-        except httpx.HTTPError:
+        except httpx.HTTPError as e:
+            _log_ai_error(e)
             yield "\n[Sorry, the assistant is unavailable right now. Please try again, or use the Book Appointment button.]"
             return
         # Log the full conversation once finished.
@@ -50,7 +63,8 @@ async def chat(req: ChatRequest, request: Request):
     messages = [{"role": m.role, "content": m.content} for m in req.messages]
     try:
         reply = await ai.chat(messages)
-    except httpx.HTTPError:
+    except httpx.HTTPError as e:
+        _log_ai_error(e)
         raise HTTPException(
             status_code=503,
             detail="AI assistant is temporarily unavailable. Please try again shortly.",
