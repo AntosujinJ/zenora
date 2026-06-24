@@ -29,7 +29,7 @@ async def chat_stream(req: ChatRequest, request: Request):
                 collected.append(token)
                 yield token
         except httpx.HTTPError:
-            yield "\n[AI service unavailable. Is Ollama running?]"
+            yield "\n[Sorry, the assistant is unavailable right now. Please try again, or use the Book Appointment button.]"
             return
         # Log the full conversation once finished.
         reply = "".join(collected)
@@ -53,7 +53,7 @@ async def chat(req: ChatRequest, request: Request):
     except httpx.HTTPError:
         raise HTTPException(
             status_code=503,
-            detail="AI service unavailable. Is Ollama running?",
+            detail="AI assistant is temporarily unavailable. Please try again shortly.",
         )
 
     # Log the conversation (useful for the clinic dashboard later).
