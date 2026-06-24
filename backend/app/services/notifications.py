@@ -15,8 +15,16 @@ from ..config import settings
 from ..db import DB
 
 
-def _email_configured() -> bool:
+def _resend_configured() -> bool:
+    return bool(settings.resend_api_key)
+
+
+def _smtp_configured() -> bool:
     return bool(settings.smtp_host and settings.smtp_user and settings.smtp_password)
+
+
+def _email_configured() -> bool:
+    return _resend_configured() or _smtp_configured()
 
 
 def _whatsapp_configured() -> bool:
@@ -49,6 +57,23 @@ def _mask(value: str) -> str:
 
 
 # ---------------- senders ----------------
+async def _send_email_resend(to: str, subject: str, html: str, text: str):
+    """Send via Resend's HTTPS API (works where SMTP ports are blocked)."""
+    async with httpx.AsyncClient(timeout=20) as client:
+        r = await client.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {settings.resend_api_key}"},
+            json={
+                "from": f"{settings.clinic_name} <{settings.email_from}>",
+                "to": [to],
+                "subject": subject,
+                "html": html,
+                "text": text,
+            },
+        )
+        r.raise_for_status()
+
+
 def _send_email_sync(to: str, subject: str, html: str, text: str):
     msg = EmailMessage()
     msg["From"] = settings.smtp_from or settings.smtp_user
@@ -69,9 +94,16 @@ async def send_email(to: str, subject: str, html: str, text: str) -> bool:
         print(f"\n[EMAIL · console] → {_mask(to)}\nSubject: {subject}\n{text}\n", flush=True)
         return True
     try:
-        await asyncio.to_thread(_send_email_sync, to, subject, html, text)
+        if _resend_configured():
+            await _send_email_resend(to, subject, html, text)
+        else:
+            await asyncio.to_thread(_send_email_sync, to, subject, html, text)
         print(f"[EMAIL · sent] → {_mask(to)} | {subject}", flush=True)
         return True
+    except httpx.HTTPStatusError as e:
+        body = e.response.text[:300] if e.response is not None else ""
+        print(f"[EMAIL · ERROR] → {_mask(to)}: HTTP {e.response.status_code} {body}", flush=True)
+        return False
     except Exception as e:
         print(f"[EMAIL · ERROR] → {_mask(to)}: {type(e).__name__}: {e}", flush=True)
         return False

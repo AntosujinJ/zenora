@@ -48,8 +48,18 @@ class Settings(BaseSettings):
     notify_email: bool = True
     notify_whatsapp: bool = True
 
-    # Email (SMTP). For Gmail: host=smtp.gmail.com, port=587, user=your gmail,
-    # password = a 16-char App Password (https://myaccount.google.com/apppasswords).
+    # Email — two ways to send:
+    # 1) Resend HTTP API (works on hosts that block SMTP, e.g. Render free tier).
+    #    Get a free key at https://resend.com → set RESEND_API_KEY. Sending to
+    #    arbitrary addresses needs a verified domain; until then you can only send
+    #    to your own Resend account email, using the default onboarding@resend.dev.
+    resend_api_key: str = ""
+    # From address for Resend. Use "onboarding@resend.dev" for testing, or your
+    # own verified-domain address (e.g. "appointments@yourclinic.com") in prod.
+    email_from: str = "onboarding@resend.dev"
+
+    # 2) SMTP (good for local dev; blocked on Render free tier). For Gmail:
+    #    host=smtp.gmail.com, port=587, user=your gmail, password=16-char App Password.
     smtp_host: str = ""
     smtp_port: int = 587
     smtp_user: str = ""
